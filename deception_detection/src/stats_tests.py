@@ -100,3 +100,21 @@ def correlation_analysis(df):
     print("==============================")
 
     # Convert
+
+def run_full_statistical_tests(df):
+    """
+    Runs all statistical tests needed for thesis/paper:
+      - Superlative t-test
+      - Pronoun t-test
+      - Correlation analysis
+    """
+
+    print("\n==========================================")
+    print(" Running Full Statistical Hypothesis Tests")
+    print("==========================================")
+
+    superlative_ttest(df)
+    pronoun_ttest(df)
+    correlation_analysis(df)
+
+    print("\nAll statistical tests completed.\n")
