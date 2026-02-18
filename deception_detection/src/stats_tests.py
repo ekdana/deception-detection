@@ -82,7 +82,9 @@ def pronoun_ttest(df):
     plt.boxplot([truthful_fp, deceptive_fp], labels=["Truthful", "Deceptive"])
     plt.title("Pronoun Usage Distribution")
     plt.ylabel("Pronouns per 100 words")
-    plt.show()
+    plt.savefig("pronoun_boxplot.png")
+    print("Saved pronoun_boxplot.png")
+
 
 
     return t_stat, p_value, d
