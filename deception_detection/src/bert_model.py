@@ -155,6 +155,13 @@ def train_bert_model(train_texts, test_texts, train_labels, test_labels):
     # Evaluate
     results = trainer.evaluate()
 
+    # Save model + tokenizer
+    model.save_pretrained("saved_bert_model")
+    tokenizer.save_pretrained("saved_bert_model")
+
+    print("\nModel saved to: saved_bert_model/")
+
+
     print("\n==============================")
     print("   Final Evaluation Results")
     print("==============================")
