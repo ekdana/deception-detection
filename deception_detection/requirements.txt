@@ -1,0 +1,40 @@
+# ================================
+# Core Data Science Libraries
+# ================================
+numpy
+pandas
+
+# ================================
+# Visualization (EDA)
+# ================================
+matplotlib
+seaborn
+wordcloud
+
+# ================================
+# Machine Learning (Baseline Models)
+# ================================
+scikit-learn
+
+# ================================
+# Statistical Testing
+# ================================
+scipy
+
+# ================================
+# NLP Preprocessing
+# ================================
+nltk
+regex
+
+# ================================
+# Deep Learning + Transformers (BERT)
+# ================================
+torch
+transformers
+datasets
+
+# ================================
+# Optional (if you later use imbalance handling)
+# ================================
+imbalanced-learn

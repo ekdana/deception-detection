@@ -1,0 +1,14 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# HuggingFace outputs
+bert_results/
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
