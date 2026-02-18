@@ -127,7 +127,7 @@ def train_bert_model(train_texts, test_texts, train_labels, test_labels):
         output_dir="./bert_results",
 
         # IMPORTANT FIX: correct parameter name
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
 
         save_strategy="no",
         learning_rate=2e-5,
