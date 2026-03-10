@@ -89,14 +89,12 @@ def demo_fallback_score(text: str) -> dict:
 
 
 from pathlib import Path
+from fastapi.responses import FileResponse
 
-@app.get("/", response_class=HTMLResponse)
+
+@app.get("/")
 def demo_page():
-    base_dir = Path(__file__).resolve().parent
-    html_path = base_dir / "web_demo.html"
-
-    with open(html_path, "r", encoding="utf-8") as f:
-        return f.read()
+    return FileResponse(Path(__file__).parent / "web_demo.html")
 
 
 @app.get("/health")
