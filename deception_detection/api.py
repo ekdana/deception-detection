@@ -1,8 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from typing import List, Optional
 import os
-import json
 
 from src.predict import load_model, predict_text
 
@@ -32,7 +32,7 @@ def startup_load_model():
             print(f"Failed to load model: {e}")
             MODEL, TOKENIZER = None, None
     else:
-        print("saved_bert_model folder not found. API will run in demo-fallback mode.")
+        print("saved_bert_model not found. Running in demo fallback mode.")
         MODEL, TOKENIZER = None, None
 
 
@@ -42,11 +42,6 @@ def on_startup():
 
 
 def extract_text_from_file_content(filename: str, content: bytes) -> str:
-    """
-    Very simple demo extraction.
-    Best for txt/csv/json/md.
-    For binary files like pdf/docx, this demo only returns a placeholder.
-    """
     ext = os.path.splitext(filename)[1].lower()
 
     if ext in [".txt", ".csv", ".json", ".md", ".log"]:
@@ -55,35 +50,31 @@ def extract_text_from_file_content(filename: str, content: bytes) -> str:
         except Exception:
             return ""
 
-    return f"[Uploaded file: {filename}. Binary/parsing not implemented in this demo.]"
+    return f"[Uploaded file: {filename}. Parsing for this file type is not implemented in demo mode.]"
 
 
 def demo_fallback_score(text: str) -> dict:
-    """
-    Fallback scoring when trained model is unavailable.
-    Only for demo purposes.
-    """
     lowered = text.lower()
     score = 18
-    triggers = []
+    flags = []
 
     suspicious = [
         "honestly", "trust me", "believe me", "i swear",
         "guaranteed", "100%", "never", "always", "obviously"
     ]
 
-    for word in suspicious:
-        if word in lowered:
+    for phrase in suspicious:
+        if phrase in lowered:
             score += 7
-            triggers.append(f'Contains phrase: "{word}"')
+            flags.append(f'Contains phrase: "{phrase}"')
 
     if text.count("!") >= 3:
         score += 10
-        triggers.append("Many exclamation marks")
+        flags.append("Many exclamation marks")
 
     if len(text.split()) < 15:
         score += 6
-        triggers.append("Very short text")
+        flags.append("Very short text")
 
     score = max(1, min(99, score))
 
@@ -91,14 +82,22 @@ def demo_fallback_score(text: str) -> dict:
         "label": "DECEPTIVE ❌" if score >= 50 else "TRUTHFUL ✅",
         "deception_rate": round(score, 2),
         "trustworthiness_score": round(100 - score, 2),
-        "flags": triggers[:5]
+        "confidence": 70.0,
+        "flags": flags[:5],
+        "model_mode": "demo_fallback"
     }
 
 
-@app.get("/")
-def root():
+@app.get("/", response_class=HTMLResponse)
+def demo_page():
+    with open("web_demo.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get("/health")
+def health():
     return {
-        "message": "Deception Detection Demo API is running",
+        "status": "ok",
         "model_loaded": MODEL is not None
     }
 
@@ -125,9 +124,7 @@ async def analyze(
                 combined_text += "\n\n" + extracted.strip()
 
     if not combined_text.strip():
-        return {
-            "error": "No text or readable file content provided."
-        }
+        return {"error": "No text or readable file content provided."}
 
     if MODEL is not None and TOKENIZER is not None:
         try:
@@ -142,17 +139,13 @@ async def analyze(
                 "deception_rate": round(float(deception_score) * 100, 2),
                 "trustworthiness_score": round(float(trust_score) * 100, 2),
                 "confidence": round(max(float(deception_score), float(trust_score)) * 100, 2),
+                "flags": [],
                 "model_mode": "bert",
                 "uploaded_files": uploaded_files_info
             }
         except Exception as e:
-            return {
-                "error": f"Prediction failed: {str(e)}"
-            }
+            return {"error": f"Prediction failed: {str(e)}"}
 
-    demo_result = demo_fallback_score(combined_text)
-    demo_result["confidence"] = 70.0
-    demo_result["model_mode"] = "demo_fallback"
-    demo_result["uploaded_files"] = uploaded_files_info
-
-    return demo_result
+    result = demo_fallback_score(combined_text)
+    result["uploaded_files"] = uploaded_files_info
+    return result

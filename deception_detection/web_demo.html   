@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deception Detection Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #111827;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .title {
+      font-size: 38px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #4b5563;
+      margin-bottom: 28px;
+      font-size: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    .label {
+      display: block;
+      margin: 14px 0 8px;
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 14px;
+      resize: vertical;
+      font-size: 15px;
+    }
+
+    input[type="file"] {
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+
+    .file-list {
+      margin-top: 10px;
+    }
+
+    .file-item {
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .metric-box {
+      background: #eef4ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .metric-label {
+      color: #4b5563;
+      font-size: 14px;
+    }
+
+    .metric-value {
+      font-size: 52px;
+      font-weight: 800;
+      color: #1d4ed8;
+      margin-top: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .small-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .small-label {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .small-value {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 16px 0 10px;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .loader {
+      display: none;
+      margin-top: 10px;
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    ul {
+      padding-left: 20px;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+      <div class="title">Deception Detection Demo</div>
+      <div class="subtitle">
+        Upload text and files, then estimate deception rate as a percentage.
+      </div>
+
+      <div class="card">
+        <label class="label">Paste text</label>
+        <textarea id="textInput" placeholder="Enter review, statement, message, claim, or article excerpt..."></textarea>
+
+        <label class="label">Upload files</label>
+        <input id="fileInput" type="file" multiple />
+
+        <div id="fileList" class="file-list"></div>
+
+        <div class="actions">
+          <button class="primary" onclick="analyze()">Analyze</button>
+          <button class="secondary" onclick="resetForm()">Reset</button>
+        </div>
+
+        <div id="loader" class="loader">Analyzing...</div>
+      </div>
+
+      <div id="resultCard" class="card result">
+        <div class="section-title">Result</div>
+        <div id="errorBox" class="error" style="display:none;"></div>
+
+        <div id="successBox" style="display:none;">
+          <div class="metric-box">
+            <div class="metric-label">Deception Rate</div>
+            <div id="deceptionRate" class="metric-value">0%</div>
+          </div>
+
+          <div class="grid">
+            <div class="small-card">
+              <div class="small-label">Classification</div>
+              <div id="labelValue" class="small-value">-</div>
+            </div>
+            <div class="small-card">
+              <div class="small-label">Trustworthiness</div>
+              <div id="trustValue" class="small-value">-</div>
+            </div>
+            <div class="small-card">
+              <div class="small-label">Confidence</div>
+              <div id="confidenceValue" class="small-value">-</div>
+            </div>
+            <div class="small-card">
+              <div class="small-label">Mode</div>
+              <div id="modeValue" class="small-value">-</div>
+            </div>
+          </div>
+
+          <div id="uploadedSection" style="display:none;">
+            <div class="section-title">Uploaded Files</div>
+            <div id="uploadedFilesBox"></div>
+          </div>
+
+          <div id="flagsSection" style="display:none;">
+            <div class="section-title">Flags</div>
+            <ul id="flagsList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+
+    fileInput.addEventListener("change", () => {
+      renderSelectedFiles();
+    });
+
+    function renderSelectedFiles() {
+      fileList.innerHTML = "";
+      const files = Array.from(fileInput.files || []);
+
+      files.forEach(file => {
+        const div = document.createElement("div");
+        div.className = "file-item";
+        div.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+        fileList.appendChild(div);
+      });
+    }
+
+    async function analyze() {
+      const text = document.getElementById("textInput").value;
+      const files = Array.from(fileInput.files || []);
+      const loader = document.getElementById("loader");
+      const resultCard = document.getElementById("resultCard");
+      const errorBox = document.getElementById("errorBox");
+      const successBox = document.getElementById("successBox");
+
+      loader.style.display = "block";
+      resultCard.style.display = "none";
+      errorBox.style.display = "none";
+      successBox.style.display = "none";
+
+      const formData = new FormData();
+      formData.append("text", text);
+
+      files.forEach(file => {
+        formData.append("files", file);
+      });
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        resultCard.style.display = "block";
+
+        if (data.error) {
+          errorBox.style.display = "block";
+          errorBox.textContent = data.error;
+        } else {
+          successBox.style.display = "block";
+
+          document.getElementById("deceptionRate").textContent = `${data.deception_rate}%`;
+          document.getElementById("labelValue").textContent = data.label || "-";
+          document.getElementById("trustValue").textContent = `${data.trustworthiness_score}%`;
+          document.getElementById("confidenceValue").textContent = `${data.confidence}%`;
+          document.getElementById("modeValue").textContent = data.model_mode || "-";
+
+          const uploadedSection = document.getElementById("uploadedSection");
+          const uploadedFilesBox = document.getElementById("uploadedFilesBox");
+          uploadedFilesBox.innerHTML = "";
+
+          if (data.uploaded_files && data.uploaded_files.length > 0) {
+            uploadedSection.style.display = "block";
+            data.uploaded_files.forEach(file => {
+              const div = document.createElement("div");
+              div.className = "file-item";
+              div.textContent = `${file.filename} - ${file.size_bytes} bytes`;
+              uploadedFilesBox.appendChild(div);
+            });
+          } else {
+            uploadedSection.style.display = "none";
+          }
+
+          const flagsSection = document.getElementById("flagsSection");
+          const flagsList = document.getElementById("flagsList");
+          flagsList.innerHTML = "";
+
+          if (data.flags && data.flags.length > 0) {
+            flagsSection.style.display = "block";
+            data.flags.forEach(flag => {
+              const li = document.createElement("li");
+              li.textContent = flag;
+              flagsList.appendChild(li);
+            });
+          } else {
+            flagsSection.style.display = "none";
+          }
+        }
+      } catch (err) {
+        resultCard.style.display = "block";
+        errorBox.style.display = "block";
+        errorBox.textContent = "Failed to connect to backend.";
+      } finally {
+        loader.style.display = "none";
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("textInput").value = "";
+      fileInput.value = "";
+      fileList.innerHTML = "";
+      document.getElementById("resultCard").style.display = "none";
+    }
+  </script>
+</body>
+</html>
