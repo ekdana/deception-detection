@@ -38,3 +38,7 @@ datasets
 # Optional (if you later use imbalance handling)
 # ================================
 imbalanced-learn
+
+fastapi
+uvicorn
+python-multipart
