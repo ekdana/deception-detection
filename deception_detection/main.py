@@ -73,7 +73,12 @@ def add_features(df):
     df = extract_all_features(df)
 
     print("Features added successfully!")
-    print(df[["superlative_ratio", "fp_per_100"]].head())
+    printprint(df[[
+        "superlative_ratio",
+        "fp_per_100",
+        "negation_per_100",
+        "hedging_per_100"
+    ]].head())
 
     return df
 
