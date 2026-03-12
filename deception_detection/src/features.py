@@ -126,9 +126,157 @@ def extract_pronoun_features(df):
 
     return df
 
+# =====================================================
+# 3. NEGATION FEATURE ENGINEERING
+# =====================================================
+
+NEGATION_WORDS = [
+    "not", "no", "never", "nothing", "nowhere", "nobody", "none",
+    "neither", "nor", "n't", "cannot", "can't", "won't", "wouldn't",
+    "shouldn't", "couldn't", "don't", "doesn't", "didn't", "isn't",
+    "aren't", "wasn't", "weren't", "haven't", "hasn't", "hadn't"
+]
+
+
+def count_negations(text: str) -> int:
+    """
+    Counts negation words in a review.
+    """
+    words = tokenize_text(text)
+    return sum(word in NEGATION_WORDS for word in words)
+
+
+def negation_per_100_words(text: str) -> float:
+    """
+    Normalized negation usage per 100 words.
+    """
+    words = tokenize_text(text)
+    if len(words) == 0:
+        return 0.0
+
+    neg_count = count_negations(text)
+    return (neg_count / len(words)) * 100
+
+
+def extract_negation_features(df):
+    """
+    Adds negation_count and negation_per_100 columns to dataframe.
+    """
+    df["negation_count"] = df["text"].apply(count_negations)
+    df["negation_per_100"] = df["text"].apply(negation_per_100_words)
+    return df
+
+
+def most_common_negations(text_series, top_n=10):
+    """
+    Returns the most frequent negation words in the dataset.
+    """
+    all_words = []
+
+    for text in text_series:
+        words = tokenize_text(text)
+        all_words.extend([w for w in words if w in NEGATION_WORDS])
+
+    return Counter(all_words).most_common(top_n)
+
 
 # =====================================================
-# 3. FULL FEATURE PIPELINE
+# 4. HEDGING FEATURE ENGINEERING
+# =====================================================
+
+HEDGING_WORDS = [
+    # Modal verbs and adverbs of uncertainty
+    "maybe", "probably", "possibly", "perhaps", "might", "may",
+    "could", "would", "should", "seem", "seems", "seemed",
+    "appear", "appears", "appeared",
+
+    # Approximating expressions
+    "about", "around", "approximately", "roughly", "nearly",
+    "almost", "somewhat", "quite", "rather", "fairly",
+
+    # Uncertainty markers
+    "suppose", "guess", "think", "believe", "assume",
+    "feel", "suspect", "doubt", "wonder",
+
+    # Degree modifiers
+    "pretty", "relatively", "reasonably"
+]
+
+MULTI_WORD_HEDGES = [
+    "kind of", "sort of", "a bit", "a little"
+]
+
+
+def count_hedging(text: str) -> int:
+    """
+    Counts hedging expressions in a review.
+    Includes both single-word and multi-word hedges.
+    """
+    if pd.isna(text):
+        return 0
+
+    text_lower = str(text).lower()
+    count = 0
+
+    # multi-word hedges
+    for hedge in MULTI_WORD_HEDGES:
+        count += text_lower.count(hedge)
+
+    # single-word hedges
+    words = tokenize_text(text)
+    count += sum(word in HEDGING_WORDS for word in words)
+
+    return count
+
+
+def hedging_per_100_words(text: str) -> float:
+    """
+    Normalized hedging usage per 100 words.
+    """
+    words = tokenize_text(text)
+    if len(words) == 0:
+        return 0.0
+
+    hedge_count = count_hedging(text)
+    return (hedge_count / len(words)) * 100
+
+
+def extract_hedging_features(df):
+    """
+    Adds hedging_count and hedging_per_100 columns to dataframe.
+    """
+    df["hedging_count"] = df["text"].apply(count_hedging)
+    df["hedging_per_100"] = df["text"].apply(hedging_per_100_words)
+    return df
+
+
+def most_common_hedging(text_series, top_n=15):
+    """
+    Returns the most frequent hedging expressions in the dataset.
+    Includes both single-word and multi-word hedges.
+    """
+    all_hedges = []
+
+    for text in text_series:
+        if pd.isna(text):
+            continue
+
+        text_lower = str(text).lower()
+
+        # multi-word hedges
+        for hedge in MULTI_WORD_HEDGES:
+            count = text_lower.count(hedge)
+            all_hedges.extend([hedge] * count)
+
+        # single-word hedges
+        words = tokenize_text(text)
+        all_hedges.extend([w for w in words if w in HEDGING_WORDS])
+
+    return Counter(all_hedges).most_common(top_n)
+
+
+# =====================================================
+# 5. FULL FEATURE PIPELINE
 # =====================================================
 
 def extract_all_features(df):
@@ -139,9 +287,15 @@ def extract_all_features(df):
       - superlative_ratio
       - fp_count
       - fp_per_100
+      - negation_count
+      - negation_per_100
+      - hedging_count
+      - hedging_per_100
     """
-
     df = extract_superlative_features(df)
     df = extract_pronoun_features(df)
+    df = extract_negation_features(df)
+    df = extract_hedging_features(df)
 
     return df
+
