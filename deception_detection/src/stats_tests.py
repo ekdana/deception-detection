@@ -91,7 +91,71 @@ def pronoun_ttest(df):
 
 
 # =====================================================
-# 3. CORRELATION ANALYSIS
+# 3. NEGATION T-TEST + BOX PLOT
+# =====================================================
+
+def negation_ttest(df):
+
+    print("\n==============================")
+    print(" Negation Deep Test")
+    print("==============================")
+
+    deceptive_neg = df[df["deceptive"] == "deceptive"]["negation_per_100"]
+    truthful_neg = df[df["deceptive"] == "truthful"]["negation_per_100"]
+
+    print(f"Deceptive mean negations per 100 words: {deceptive_neg.mean():.4f}")
+    print(f"Truthful mean negations per 100 words : {truthful_neg.mean():.4f}")
+
+    t_stat, p_value = ttest_ind(deceptive_neg, truthful_neg, equal_var=False)
+
+    print(f"T-statistic: {t_stat:.4f}")
+    print(f"P-value: {p_value:.6f}")
+
+    d = cohens_d(deceptive_neg, truthful_neg)
+    print(f"Cohen’s d effect size: {d:.4f}")
+
+    plt.figure(figsize=(6,4))
+    plt.boxplot([truthful_neg, deceptive_neg], labels=["Truthful","Deceptive"])
+    plt.title("Negation Usage Distribution")
+    plt.ylabel("Negations per 100 words")
+    plt.savefig("negation_boxplot.png")
+
+    return t_stat, p_value, d
+
+# =====================================================
+# 4. HEDGING T-TEST + BOX PLOT
+# =====================================================
+
+def hedging_ttest(df):
+
+    print("\n==============================")
+    print(" Hedging Deep Test")
+    print("==============================")
+
+    deceptive_hedge = df[df["deceptive"] == "deceptive"]["hedging_per_100"]
+    truthful_hedge = df[df["deceptive"] == "truthful"]["hedging_per_100"]
+
+    print(f"Deceptive mean hedging per 100 words: {deceptive_hedge.mean():.4f}")
+    print(f"Truthful mean hedging per 100 words : {truthful_hedge.mean():.4f}")
+
+    t_stat, p_value = ttest_ind(deceptive_hedge, truthful_hedge, equal_var=False)
+
+    print(f"T-statistic: {t_stat:.4f}")
+    print(f"P-value: {p_value:.6f}")
+
+    d = cohens_d(deceptive_hedge, truthful_hedge)
+    print(f"Cohen’s d effect size: {d:.4f}")
+
+    plt.figure(figsize=(6,4))
+    plt.boxplot([truthful_hedge, deceptive_hedge], labels=["Truthful","Deceptive"])
+    plt.title("Hedging Usage Distribution")
+    plt.ylabel("Hedging per 100 words")
+    plt.savefig("hedging_boxplot.png")
+
+    return t_stat, p_value, d
+
+# =====================================================
+# 5. CORRELATION ANALYSIS
 # =====================================================
 
 def correlation_analysis(df):
@@ -100,20 +164,23 @@ def correlation_analysis(df):
     print(" Feature Correlation Analysis")
     print("==============================")
 
-    # Convert labels to numeric
     df["label"] = df["deceptive"].map({"truthful": 0, "deceptive": 1})
 
     sup_corr = df["superlative_ratio"].corr(df["label"])
     fp_corr = df["fp_per_100"].corr(df["label"])
+    neg_corr = df["negation_per_100"].corr(df["label"])
+    hedge_corr = df["hedging_per_100"].corr(df["label"])
 
     print(f"Correlation(superlatives, deception): {sup_corr:.4f}")
     print(f"Correlation(pronouns, deception): {fp_corr:.4f}")
+    print(f"Correlation(negations, deception): {neg_corr:.4f}")
+    print(f"Correlation(hedging, deception): {hedge_corr:.4f}")
 
-    return sup_corr, fp_corr
+    return sup_corr, fp_corr, neg_corr, hedge_corr
 
 
 # =====================================================
-# 4. FULL REPORT
+# 6. FULL REPORT
 # =====================================================
 
 def run_full_statistical_tests(df):
