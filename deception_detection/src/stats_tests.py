@@ -191,6 +191,8 @@ def run_full_statistical_tests(df):
 
     superlative_ttest(df)
     pronoun_ttest(df)
+    negation_ttest(df)
+    hedging_ttest(df)
     correlation_analysis(df)
 
     print("\nAll statistical tests completed.\n")
