@@ -130,6 +130,16 @@ def extract_pronoun_features(df):
 # 3. NEGATION FEATURE ENGINEERING
 # =====================================================
 
+def tokenize_text(text: str):
+    """
+    Lowercases and splits text into word tokens.
+    Used internally by negation and hedging feature extractors.
+    """
+    if pd.isna(text):
+        return []
+    return re.findall(r"\b\w+\b", str(text).lower())
+
+
 NEGATION_WORDS = [
     "not", "no", "never", "nothing", "nowhere", "nobody", "none",
     "neither", "nor", "n't", "cannot", "can't", "won't", "wouldn't",
@@ -298,4 +308,3 @@ def extract_all_features(df):
     df = extract_hedging_features(df)
 
     return df
-
