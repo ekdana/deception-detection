@@ -131,11 +131,13 @@ def train_bert_model(train_texts, test_texts, train_labels, test_labels):
 
         save_strategy="no",
         learning_rate=2e-5,
-        per_device_train_batch_size=8,
+        per_device_train_batch_size=16,
         per_device_eval_batch_size=8,
-        num_train_epochs=3,
+        num_train_epochs=5,
         weight_decay=0.01,
-
+        warmup_ratio=0.1,                
+        load_best_model_at_end=True,     
+        metric_for_best_model="f1",  
         logging_dir="./logs",
         logging_steps=20
     )

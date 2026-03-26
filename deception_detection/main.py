@@ -191,7 +191,7 @@ def main():
     print("\n==============================")
     print(" Running Hybrid Ensemble...")
     print("==============================")
-    run_hybrid_ensemble(df, bert_model_path="saved_bert_model", use_stacking=False)
+    run_hybrid_ensemble(df, bert_model_path="saved_bert_model", use_stacking=True)
 
 
 # =====================================================
