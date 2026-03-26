@@ -29,6 +29,7 @@ def load_data():
 
     # Rename columns (same as your original code)
     df.columns = ["deceptive", "hotel", "polarity", "source", "text"]
+    df["text_original"] = df["text"] 
 
     print("Dataset loaded successfully!")
     print("Total samples:", len(df))
@@ -49,7 +50,7 @@ def clean_text(df):
     print(" Text Preprocessing...")
     print("==============================")
 
-    df["text"] = df["text"].apply(preprocess_text)
+    df["text_clean"] = df["text"].apply(preprocess_text)
 
     print("Text preprocessing completed.")
 
@@ -111,7 +112,7 @@ def run_classical_models(df):
 
     # Encode labels
     y = df["deceptive"].map({"truthful": 0, "deceptive": 1})
-    X = df["text"]
+    X = df["text_clean"]
 
     # Split
     X_train, X_test, y_train, y_test = train_test_split(
@@ -147,7 +148,7 @@ def run_bert(df):
 
     # Train/test split
     train_texts, test_texts, train_labels, test_labels = train_test_split(
-        df["text"].tolist(),
+       df["text_original"].tolist(),
         df["label"].tolist(),
         test_size=0.2,
         random_state=42,
