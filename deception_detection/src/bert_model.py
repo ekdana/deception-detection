@@ -27,7 +27,7 @@ class ReviewDataset(Dataset):
     Converts review texts into tokenized inputs.
     """
 
-    def __init__(self, texts, labels, tokenizer, max_length=128):
+    def __init__(self, texts, labels, tokenizer, mmax_length=256):
 
         self.texts = texts
         self.labels = labels
@@ -99,7 +99,7 @@ def train_bert_model(train_texts, test_texts, train_labels, test_labels):
     print("   BERT Training Started")
     print("==============================")
 
-    model_name = "bert-base-uncased"
+    model_name = "distilbert-base-uncased"
 
     # Load tokenizer + model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
