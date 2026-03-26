@@ -9,6 +9,7 @@ from src.features import extract_all_features
 from src.stats_tests import run_full_statistical_tests
 from src.classical_models import train_logistic_regression, train_svc
 from src.bert_model import train_bert_model
+from src.hybrid_model import run_hybrid_ensemble
 
 
 # =====================================================
@@ -73,7 +74,7 @@ def add_features(df):
     df = extract_all_features(df)
 
     print("Features added successfully!")
-    printprint(df[[
+    print(df[[
         "superlative_ratio",
         "fp_per_100",
         "negation_per_100",
@@ -183,6 +184,14 @@ def main():
 
     # Step 6: BERT fine-tuning
     run_bert(df)
+
+    # Step 7: Hybrid ensemble — BERT + LR + SVC (weighted soft voting)
+    # Requires saved_bert_model/ from step 6.
+    # Switch use_stacking=True for the meta-learner variant.
+    print("\n==============================")
+    print(" Running Hybrid Ensemble...")
+    print("==============================")
+    run_hybrid_ensemble(df, bert_model_path="saved_bert_model", use_stacking=False)
 
 
 # =====================================================
