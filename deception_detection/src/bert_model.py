@@ -27,7 +27,7 @@ class ReviewDataset(Dataset):
     Converts review texts into tokenized inputs.
     """
 
-    def __init__(self, texts, labels, tokenizer, mmax_length=256):
+    def __init__(self, texts, labels, tokenizer, max_length=256):
 
         self.texts = texts
         self.labels = labels
@@ -128,7 +128,6 @@ def train_bert_model(train_texts, test_texts, train_labels, test_labels):
 
 
         eval_strategy="epoch",
-
         save_strategy="epoch",           
         learning_rate=2e-5,
         per_device_train_batch_size=16,
@@ -157,8 +156,8 @@ def train_bert_model(train_texts, test_texts, train_labels, test_labels):
     # Evaluate
     results = trainer.evaluate()
 
-    # Save model + tokenizer
-    model.save_pretrained("saved_bert_model")
+    # Save best model + tokenizer
+    trainer.save_model("saved_bert_model")
     tokenizer.save_pretrained("saved_bert_model")
 
     print("\nModel saved to: saved_bert_model/")
