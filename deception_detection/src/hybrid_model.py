@@ -342,7 +342,7 @@ def run_hybrid_ensemble(df, bert_model_path="saved_bert_model",
     print("==============================")
 
     y = df["deceptive"].map({"truthful": 0, "deceptive": 1})
-    X = df["text_clean"]
+    X = df["text"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y,

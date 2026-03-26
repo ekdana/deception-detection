@@ -302,7 +302,6 @@ def extract_all_features(df):
       - hedging_count
       - hedging_per_100
     """
-    df["text"] = df["text_clean"]
     df = extract_superlative_features(df)
     df = extract_pronoun_features(df)
     df = extract_negation_features(df)
